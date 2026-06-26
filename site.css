@@ -1,0 +1,2949 @@
+/* Artistry Beauty Lounge — page layout on Neo Design (palette: moon) */
+
+/* ===========================================================================
+   Site shell width (site-specific override of the Neo container token)
+   -------------------------------------------------------------------------
+   Neo ships a 1280px content cap. On wide desktop monitors (1440/1680/1920)
+   that left big empty plum gutters down both sides (200px+ each at 1680),
+   which read as "too much space on left and right". The Neo design guide
+   explicitly supports raising this per build, so we widen the shared shell
+   to 1440px. Header nav, main content and footer all read the same token, so
+   they stay edge-aligned. Long-form prose is still held to --neo-measure
+   (72ch) by the design system, so line lengths don't get unwieldy.
+   At <=1280px nothing changes: the container fills the viewport minus the
+   24px (16px mobile) side padding, exactly as before.
+   =========================================================================== */
+:root {
+  --neo-container-max: 1440px;
+}
+
+/* --- Brand wordmark ---
+   Transparent PNG wordmark in near-black ink. It reads on the light surfaces of
+   the light theme as-is; flip it to near-white on the dark theme and on the
+   accent-gradient contact-card header so it always stays legible. */
+.neo-mobile-header__logo,
+.neo-footer__logo img,
+.neo-contact-card__logo {
+  object-fit: contain;
+}
+
+.neo-footer__logo img {
+  width: auto;
+  height: 40px;
+}
+
+[data-neo-theme="dark"] .neo-mobile-header__logo,
+[data-neo-theme="dark"] .neo-footer__logo img {
+  filter: invert(1) brightness(1.7);
+}
+
+/* The contact-card header sits on the plum accent gradient in both themes */
+.neo-contact-card__logo {
+  height: 44px;
+  width: auto;
+  filter: invert(1) brightness(1.7);
+}
+
+/* Centred brand wordmark sitting at the foot of the footer.
+   The transparent PNG wordmark is used as an alpha mask, so the mark is painted
+   with the live palette accent gradient (it recolours itself with the theme)
+   and the gradient slowly drifts so the colours shift. */
+.neo-footer__wordmark {
+  margin-top: var(--neo-space-7);
+  /* Centre the mark on the page with a tasteful max-width instead of full-bleed.
+     The source PNG carries ~220px of transparent padding on its right edge, so
+     the box is sized to the artwork's own aspect ratio and the mask is offset to
+     crop that padding, leaving the visible wordmark truly centred. */
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
+  aspect-ratio: 584 / 121;
+  background-image: linear-gradient(
+    100deg,
+    var(--neo-accent-light) 0%,
+    var(--neo-accent) 28%,
+    var(--neo-accent-dark) 52%,
+    var(--neo-accent) 76%,
+    var(--neo-accent-light) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  -webkit-mask: url("images/logo.png") 1.13% 17.73% / 138.2% auto no-repeat;
+  mask: url("images/logo.png") 1.13% 17.73% / 138.2% auto no-repeat;
+  animation: abl-wordmark-drift 14s ease-in-out infinite alternate;
+}
+
+@keyframes abl-wordmark-drift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-footer__wordmark {
+    animation: none;
+  }
+}
+
+/* ===========================================================================
+   Desktop nav — raised mobile/desktop breakpoint (site-specific)
+   Neo defaults to 768px. With five uppercase nav links, the wide ARTISTRY
+   wordmark, and a Book Online CTA, the desktop row needs ~950px+ before
+   items stop colliding. Below 1024px we use the mobile header, drawer, and
+   bottom nav instead.
+   =========================================================================== */
+@media (max-width: 1023px) {
+  .neo-desktop-nav {
+    display: none;
+  }
+
+  .neo-mobile-header {
+    display: flex;
+  }
+
+  .neo-mobile-menu {
+    display: block;
+  }
+
+  .neo-bottom-nav {
+    display: block;
+  }
+
+  .neo-page__main,
+  #neo-main.neo-page__main {
+    padding-top: calc(var(--neo-mobile-header-height) + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--neo-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .neo-footer--with-bottom-nav {
+    padding-bottom: calc(var(--neo-bottom-nav-height) + var(--neo-space-6) + env(safe-area-inset-bottom, 0px));
+  }
+
+  #neo-a11y-root {
+    bottom: calc(var(--neo-bottom-nav-height) + var(--neo-space-8) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 1024px) {
+  .neo-desktop-nav__inner {
+    gap: var(--neo-space-4);
+    min-width: 0;
+  }
+
+  .neo-desktop-nav__inner > .neo-mobile-header__brand {
+    flex-shrink: 0;
+  }
+
+  .neo-desktop-nav__links {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .neo-desktop-nav__inner > .neo-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* Slight compression in the first ~120px above the breakpoint */
+@media (min-width: 1024px) and (max-width: 1120px) {
+  .neo-desktop-nav__inner {
+    padding-inline: var(--neo-space-4);
+    gap: var(--neo-space-3);
+  }
+
+  .neo-desktop-nav__inner .neo-mobile-header__logo {
+    height: 42px !important;
+  }
+
+  .neo-desktop-nav__links {
+    gap: var(--neo-space-3);
+    font-size: var(--neo-text-xs);
+    letter-spacing: 0.03em;
+  }
+
+  .neo-desktop-nav__inner > .neo-btn {
+    padding-inline: var(--neo-space-4);
+    font-size: var(--neo-text-sm);
+  }
+}
+
+/* Decorative hero bleed should never create a horizontal scrollbar */
+#neo-main {
+  overflow-x: clip;
+}
+
+/* --- Hero --- */
+.neo-hero {
+  position: relative;
+  display: grid;
+  gap: var(--neo-space-7);
+  align-items: center;
+  padding-block: clamp(var(--neo-space-7), 5vw, 72px);
+}
+
+@media (min-width: 768px) {
+  .neo-hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(var(--neo-space-7), 5vw, 64px);
+    padding-block: clamp(var(--neo-space-8), 6vw, 96px);
+  }
+}
+
+.neo-hero__content {
+  position: relative;
+  z-index: 1;
+}
+
+.neo-hero__content::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -8%;
+  left: -12%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--neo-accent) 28%, transparent),
+    transparent 68%
+  );
+  filter: blur(50px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.neo-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-3);
+  margin: 0 0 var(--neo-space-4);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 600;
+  letter-spacing: var(--neo-tracking-overline);
+  text-transform: uppercase;
+  color: var(--neo-accent-text);
+}
+
+.neo-hero__eyebrow::before {
+  content: "";
+  width: 34px;
+  height: 2px;
+  border-radius: var(--neo-radius-full);
+  background: var(--neo-accent);
+}
+
+.neo-hero__title {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+
+.neo-hero__accent {
+  font-style: italic;
+  color: var(--neo-accent-text);
+}
+
+.neo-hero__lead {
+  margin: var(--neo-space-5) 0 0;
+  max-width: 50ch;
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-lg);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-muted);
+}
+
+.neo-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neo-space-3);
+  margin-top: var(--neo-space-6);
+}
+
+.neo-hero__trust {
+  list-style: none;
+  margin: var(--neo-space-7) 0 0;
+  padding: var(--neo-space-5) 0 0;
+  border-top: var(--neo-border-1) solid var(--neo-border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neo-space-3) var(--neo-space-6);
+}
+
+.neo-hero__trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-2);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 500;
+  color: var(--neo-text-primary);
+}
+
+.neo-hero__trust svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--neo-accent-text);
+}
+
+.neo-hero__media {
+  position: relative;
+  isolation: isolate;
+}
+
+.neo-hero__media::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -10% -8% -6% -10%;
+  background: radial-gradient(
+    62% 62% at 68% 28%,
+    color-mix(in srgb, var(--neo-accent) 38%, transparent),
+    transparent 70%
+  );
+  filter: blur(44px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.neo-hero__media img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: clamp(280px, 70vw, 420px);
+  border-radius: var(--neo-radius-2xl);
+  object-fit: cover;
+  object-position: center 20%;
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  box-shadow: 0 28px 60px -24px var(--neo-shadow-dark);
+}
+
+@media (min-width: 768px) {
+  .neo-hero__media img {
+    height: clamp(420px, 56vh, 560px);
+  }
+}
+
+.neo-hero__badge {
+  position: absolute;
+  z-index: 2;
+  left: var(--neo-space-4);
+  bottom: var(--neo-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--neo-space-3);
+  max-width: calc(100% - var(--neo-space-7));
+  padding: var(--neo-space-3) var(--neo-space-4);
+  border-radius: var(--neo-radius-xl);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  background: color-mix(in srgb, var(--neo-bg-raised) 78%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 16px 36px -18px var(--neo-shadow-dark);
+}
+
+.neo-hero__badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--neo-radius-full);
+  background: var(--neo-accent-gradient);
+  color: #fff;
+}
+
+.neo-hero__badge-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.neo-hero__badge-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.neo-hero__badge-text strong {
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 600;
+  color: var(--neo-text-primary);
+}
+
+.neo-hero__badge-text span {
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-xs);
+  color: var(--neo-text-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .neo-hero__content,
+  .neo-hero__media {
+    animation: neo-hero-rise var(--neo-duration-slow) var(--neo-ease-default) both;
+  }
+  .neo-hero__media {
+    animation-delay: 80ms;
+  }
+}
+
+@keyframes neo-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Treatments marquee (continuous loop) --- */
+.neo-marquee {
+  position: relative;
+  margin-block: var(--neo-space-6);
+  padding-block: var(--neo-space-4);
+  border-block: var(--neo-border-1) solid var(--neo-border-subtle);
+  overflow: hidden;
+}
+
+.neo-marquee__viewport {
+  display: flex;
+  width: max-content;
+}
+
+.neo-marquee__track {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--neo-space-6);
+  margin: 0;
+  padding: 0 var(--neo-space-3);
+  list-style: none;
+  will-change: transform;
+  backface-visibility: hidden;
+  animation: neo-marquee-scroll 64s linear infinite;
+}
+
+.neo-marquee:hover .neo-marquee__track,
+.neo-marquee:focus-within .neo-marquee__track {
+  animation-play-state: paused;
+}
+
+.neo-marquee__track li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-6);
+  white-space: nowrap;
+}
+
+.neo-marquee__track a {
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-xl);
+  font-style: italic;
+  color: var(--neo-text-primary);
+  text-decoration: none;
+  transition: color var(--neo-duration-fast);
+}
+
+.neo-marquee__track a:hover,
+.neo-marquee__track a:focus-visible {
+  color: var(--neo-accent-text);
+}
+
+.neo-marquee__track li::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  background: var(--neo-accent);
+  transform: rotate(45deg);
+  opacity: 0.7;
+}
+
+@keyframes neo-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-marquee__track {
+    animation: none;
+  }
+  .neo-marquee__viewport {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .neo-marquee__track[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+/* --- Welcome intro (brand statement) --- */
+.neo-intro {
+  display: flex;
+  justify-content: center;
+}
+
+.neo-intro:not(:has(.neo-intro__panel)) {
+  display: block;
+  max-width: 760px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.neo-intro__panel {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  text-align: center;
+  padding: clamp(var(--neo-space-5), 4vw, var(--neo-space-7))
+    clamp(var(--neo-space-4), 4vw, var(--neo-space-6));
+  border-radius: var(--neo-radius-2xl);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  background:
+    radial-gradient(120% 80% at 50% -8%, color-mix(in srgb, var(--neo-accent) 8%, transparent) 0%, transparent 55%),
+    var(--neo-bg-raised);
+  box-shadow: var(--neo-elv-2);
+  overflow: hidden;
+}
+
+[data-neo-theme="dark"] .neo-intro__panel {
+  /* Lift the panel off the page base without stacking plum on plum */
+  background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--neo-accent-text) 6%, transparent) 0%, transparent 50%),
+    color-mix(in srgb, var(--neo-bg-raised) 88%, var(--neo-text-primary) 12%);
+  border-color: color-mix(in srgb, var(--neo-text-primary) 14%, transparent);
+  box-shadow:
+    var(--neo-elv-2),
+    inset 0 1px 0 color-mix(in srgb, var(--neo-text-primary) 8%, transparent);
+}
+
+.neo-intro__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--neo-accent-text), transparent);
+}
+
+[data-neo-theme="dark"] .neo-intro__panel::before {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--neo-text-primary) 35%, var(--neo-accent-text)), transparent);
+}
+
+.neo-intro__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 var(--neo-space-2);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neo-accent-text);
+}
+
+.neo-intro__eyebrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.neo-intro__title {
+  margin: 0;
+}
+
+.neo-intro__lead {
+  margin: var(--neo-space-3) auto 0;
+  max-width: 54ch;
+  font-family: var(--neo-font-ui);
+  font-size: clamp(var(--neo-text-base), 1.4vw, var(--neo-text-lg));
+  line-height: 1.55;
+  color: var(--neo-text-primary);
+}
+
+.neo-intro__body {
+  margin: var(--neo-space-2) auto 0;
+  max-width: 58ch;
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  line-height: 1.65;
+  color: var(--neo-text-muted);
+}
+
+.neo-intro__stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: var(--neo-space-5) 0 0;
+  padding: var(--neo-space-4) 0 0;
+  list-style: none;
+  border-top: var(--neo-border-1) solid var(--neo-border-subtle);
+}
+
+.neo-intro__stat {
+  position: relative;
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 var(--neo-space-3);
+}
+
+.neo-intro__stat + .neo-intro__stat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  height: 76%;
+  width: 1px;
+  background: var(--neo-border-subtle);
+}
+
+.neo-intro__stat-icon {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--neo-radius-full);
+  color: var(--neo-accent-text);
+  background: color-mix(in srgb, var(--neo-accent-text) 12%, transparent);
+}
+
+[data-neo-theme="dark"] .neo-intro__stat-icon {
+  color: var(--neo-text-primary);
+  background: color-mix(in srgb, var(--neo-text-primary) 10%, transparent);
+  border: var(--neo-border-1) solid color-mix(in srgb, var(--neo-text-primary) 12%, transparent);
+}
+
+.neo-intro__stat-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.neo-intro__stat-value {
+  font-family: var(--neo-font-ui);
+  font-weight: 600;
+  color: var(--neo-text-primary);
+}
+
+.neo-intro__stat-label {
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  color: var(--neo-text-muted);
+}
+
+.neo-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--neo-space-3);
+  margin-top: var(--neo-space-5);
+}
+
+@media (max-width: 640px) {
+  .neo-intro__stats {
+    flex-direction: column;
+    padding-top: var(--neo-space-5);
+  }
+  .neo-intro__stat {
+    padding: var(--neo-space-4) 0 0;
+  }
+  .neo-intro__stat + .neo-intro__stat::before {
+    display: none;
+  }
+  .neo-intro__stat + .neo-intro__stat {
+    border-top: var(--neo-border-1) solid var(--neo-border-subtle);
+  }
+}
+
+/* --- About profile --- */
+.neo-welcome {
+  display: grid;
+  gap: var(--neo-space-7);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .neo-welcome {
+    grid-template-columns: 0.82fr 1.18fr;
+    gap: clamp(var(--neo-space-7), 4vw, 56px);
+  }
+  .neo-welcome__content {
+    align-self: center;
+  }
+}
+
+.neo-welcome__media {
+  position: relative;
+  isolation: isolate;
+  max-width: 420px;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.neo-welcome__media::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -8% -10% -10% -8%;
+  background: radial-gradient(
+    58% 58% at 30% 24%,
+    color-mix(in srgb, var(--neo-accent) 34%, transparent),
+    transparent 70%
+  );
+  filter: blur(42px);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.neo-welcome__media img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 18%;
+  border-radius: var(--neo-radius-2xl);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  box-shadow: 0 28px 60px -24px var(--neo-shadow-dark);
+}
+
+.neo-welcome__content .neo-h2 {
+  margin-top: 0;
+}
+
+.neo-welcome__accent {
+  font-style: italic;
+  color: var(--neo-accent-text);
+}
+
+.neo-welcome__lead {
+  margin-top: var(--neo-space-5);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-lg);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-primary);
+}
+
+.neo-welcome__content .neo-body {
+  margin-top: var(--neo-space-4);
+  color: var(--neo-text-muted);
+}
+
+.neo-welcome__creds {
+  list-style: none;
+  margin: var(--neo-space-6) 0 0;
+  padding: var(--neo-space-5) 0 0;
+  border-top: var(--neo-border-1) solid var(--neo-border-subtle);
+  display: grid;
+  gap: var(--neo-space-3) var(--neo-space-5);
+}
+
+@media (min-width: 520px) {
+  .neo-welcome__creds {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.neo-welcome__creds li {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-space-3);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 500;
+  color: var(--neo-text-primary);
+}
+
+.neo-welcome__creds svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--neo-accent-text);
+}
+
+.neo-welcome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neo-space-3);
+  margin-top: var(--neo-space-6);
+}
+
+.neo-section {
+  padding-block: var(--neo-space-8);
+}
+
+.neo-section--inset {
+  background: var(--neo-bg-raised);
+  border-radius: var(--neo-radius-lg);
+  padding: var(--neo-space-6);
+  margin-block: var(--neo-space-6);
+}
+
+/* --- Flat, floating cards --- */
+.neo-card {
+  box-shadow: none;
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  transition: transform var(--neo-duration-normal) var(--neo-ease-default),
+    border-color var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+.neo-card:hover {
+  transform: translateY(-6px) scale(1.012);
+  border-color: color-mix(in srgb, var(--neo-accent) 45%, var(--neo-border-subtle));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-card {
+    transition: none;
+  }
+  .neo-card:hover {
+    transform: none;
+  }
+}
+
+/* --- Two clinic location cards --- */
+.neo-location-grid {
+  display: grid;
+  gap: var(--neo-space-4);
+  margin-top: var(--neo-space-6);
+}
+
+@media (min-width: 640px) {
+  .neo-location-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.neo-location-card {
+  padding: var(--neo-space-5);
+  background: var(--neo-bg-raised);
+  border-radius: var(--neo-radius-lg);
+}
+
+.neo-location-card__pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--neo-radius-md);
+  background: color-mix(in srgb, var(--neo-accent) 14%, var(--neo-bg-raised));
+  color: var(--neo-accent-text);
+  margin-bottom: var(--neo-space-3);
+}
+
+.neo-location-card__pin svg {
+  width: 20px;
+  height: 20px;
+}
+
+.neo-location-card h3 {
+  margin: 0 0 var(--neo-space-2);
+}
+
+.neo-location-card p {
+  margin: 0;
+  color: var(--neo-text-muted);
+  line-height: var(--neo-leading-normal);
+}
+
+/* ============================================================
+   Price list (Treatments + team pages)
+   Grouped categories, each a polished pricing card with a clear
+   header and clean, scannable service rows. Prices sit in a right
+   aligned column with a tasteful plum accent. Works in both the
+   light and dark Moon themes; single column on mobile.
+   ============================================================ */
+.neo-pricelist {
+  display: grid;
+  gap: var(--neo-space-5);
+  margin-top: var(--neo-space-6);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .neo-pricelist {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Let the wider categories span both columns */
+  .neo-price-card--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.neo-price-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--neo-space-5) var(--neo-space-5) var(--neo-space-2);
+  background: var(--neo-bg-raised);
+  border: var(--neo-border-1, 1px) solid var(--neo-border-subtle);
+  border-radius: var(--neo-radius-xl);
+  box-shadow: 0 1px 2px var(--neo-shadow-dark), 0 22px 44px -34px var(--neo-shadow-dark);
+  transition:
+    transform var(--neo-duration-normal, 200ms) var(--neo-ease-default, ease),
+    box-shadow var(--neo-duration-normal, 200ms) var(--neo-ease-default, ease),
+    border-color var(--neo-duration-normal, 200ms) var(--neo-ease-default, ease);
+}
+
+/* Slim accent ribbon along the top edge, tinted per card */
+.neo-price-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: var(--neo-radius-xl) var(--neo-radius-xl) 0 0;
+  background: linear-gradient(90deg, var(--card-tint, var(--neo-accent)), transparent 92%);
+}
+
+@media (hover: hover) {
+  .neo-price-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--card-tint, var(--neo-accent)) 55%, var(--neo-border-subtle));
+    box-shadow: 0 1px 2px var(--neo-shadow-dark), 0 30px 56px -30px var(--neo-shadow-dark);
+  }
+}
+
+.neo-price-card:focus-within {
+  border-color: color-mix(in srgb, var(--card-tint, var(--neo-accent)) 55%, var(--neo-border-subtle));
+}
+
+.neo-price-card:nth-child(6n + 1) { --card-tint: #d391b0; }
+.neo-price-card:nth-child(6n + 2) { --card-tint: #9f6496; }
+.neo-price-card:nth-child(6n + 3) { --card-tint: #7b466a; }
+.neo-price-card:nth-child(6n + 4) { --card-tint: #ba6e8f; }
+.neo-price-card:nth-child(6n + 5) { --card-tint: #5d3c64; }
+.neo-price-card:nth-child(6n + 6) { --card-tint: #c77fa6; }
+
+.neo-price-card__title {
+  margin: 0;
+  padding-bottom: var(--neo-space-3);
+  color: var(--neo-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--neo-space-3);
+}
+
+/* Decorative accent rule that grows from the title */
+.neo-price-card__title::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 2px;
+  border-radius: var(--neo-radius-full);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--card-tint, var(--neo-accent)) 70%, transparent), transparent);
+}
+
+.neo-price-card__intro {
+  margin: 0 0 var(--neo-space-2);
+  color: var(--neo-text-muted);
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+}
+
+.neo-price-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--neo-space-1, 6px) var(--neo-space-4);
+  align-items: baseline;
+  padding: var(--neo-space-3) var(--neo-space-2);
+  margin: 0 calc(var(--neo-space-2) * -1);
+  border-radius: var(--neo-radius-md);
+  border-bottom: var(--neo-border-1, 1px) solid var(--neo-border-subtle);
+  transition: background-color var(--neo-duration-fast, 140ms) var(--neo-ease-default, ease);
+}
+
+.neo-price-row:last-child {
+  border-bottom: none;
+}
+
+@media (hover: hover) {
+  .neo-price-row:hover {
+    background: color-mix(in srgb, var(--card-tint, var(--neo-accent)) 8%, transparent);
+  }
+}
+
+.neo-price-row__name {
+  margin: 0;
+  font-family: var(--neo-font-ui);
+  font-weight: 600;
+  font-size: var(--neo-text-base);
+  line-height: 1.35;
+  color: var(--neo-text-primary);
+}
+
+/* Small stylist / variant label that can sit beside a service name */
+.neo-price-row__tag {
+  display: inline-block;
+  margin-left: var(--neo-space-2);
+  padding: 2px 8px;
+  border-radius: var(--neo-radius-full);
+  background: color-mix(in srgb, var(--card-tint, var(--neo-accent)) 16%, transparent);
+  color: var(--neo-text-muted);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.neo-price-row__price {
+  justify-self: end;
+  padding: 2px 12px;
+  border-radius: var(--neo-radius-full);
+  background: color-mix(in srgb, var(--neo-accent) 12%, transparent);
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-xl);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--neo-accent-text);
+  white-space: nowrap;
+}
+
+.neo-price-row__desc {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-muted);
+}
+
+.neo-price-row__save {
+  grid-column: 1 / -1;
+  margin: var(--neo-space-2) 0 0;
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--neo-success, var(--neo-accent-text));
+}
+
+.neo-price-note {
+  margin: var(--neo-space-4) 0 0;
+  font-size: var(--neo-text-sm);
+  font-style: italic;
+  color: var(--neo-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-price-card,
+  .neo-price-row {
+    transition: none;
+  }
+  .neo-price-card:hover {
+    transform: none;
+  }
+}
+
+/* --- Contact --- */
+.neo-contact-grid {
+  display: grid;
+  gap: var(--neo-space-6);
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .neo-contact-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.neo-contact-card {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  box-shadow: 0 26px 55px -30px var(--neo-shadow-dark);
+}
+
+.neo-contact-card:hover {
+  transform: none;
+  border-color: var(--neo-border-subtle);
+}
+
+.neo-contact-card__header {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: var(--neo-space-6);
+  background:
+    radial-gradient(
+      120% 130% at 100% 100%,
+      color-mix(in srgb, #fff 16%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      135deg,
+      var(--neo-accent-dark) 0%,
+      var(--neo-accent) 100%
+    );
+}
+
+.neo-contact-card__tagline {
+  margin: var(--neo-space-3) 0 0;
+  max-width: 38ch;
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+  color: color-mix(in srgb, #fff 92%, transparent);
+}
+
+.neo-contact-card__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--neo-space-6);
+}
+
+.neo-contact-card__person {
+  margin-bottom: var(--neo-space-5);
+}
+
+.neo-contact-card__name {
+  margin: 0;
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-2xl);
+  line-height: var(--neo-leading-tight);
+  color: var(--neo-text-primary);
+}
+
+.neo-contact-card__role {
+  margin: var(--neo-space-2) 0 0;
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--neo-tracking-overline);
+  text-transform: uppercase;
+  color: var(--neo-accent-text);
+}
+
+.neo-contact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--neo-space-4);
+}
+
+.neo-contact-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--neo-space-3);
+  min-height: var(--neo-touch-min);
+}
+
+.neo-contact-list__item .neo-icon-tile {
+  flex-shrink: 0;
+}
+
+.neo-contact-list__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.neo-contact-list__label {
+  font-size: var(--neo-text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--neo-text-muted);
+}
+
+.neo-contact-list__value {
+  margin: 0;
+  font-size: var(--neo-text-base);
+  color: var(--neo-text-primary);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color var(--neo-duration-fast) var(--neo-ease-default);
+}
+
+a.neo-contact-list__value:hover,
+a.neo-contact-list__value:focus-visible {
+  color: var(--neo-accent-text);
+}
+
+/* ============================================================
+   Treatments — e-commerce meets Apple
+   Product-card category tiles (gradient + glyph media) that open
+   an Apple-style modal with the full price list per category.
+   ============================================================ */
+.neo-treat-grid {
+  display: grid;
+  gap: var(--neo-space-5);
+  margin-top: var(--neo-space-7);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 720px) {
+  .neo-treat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .neo-treat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--neo-space-6);
+  }
+}
+
+/* Category tile — built on .neo-product, rendered as a button */
+.neo-treat-card.neo-product {
+  width: 100%;
+  text-align: left;
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  background: var(--neo-bg-raised);
+  padding-bottom: var(--neo-space-5);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--neo-duration-normal) var(--neo-ease-default),
+    box-shadow var(--neo-duration-normal) var(--neo-ease-default),
+    border-color var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+.neo-treat-card.neo-product:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--neo-elv-3);
+  border-color: color-mix(in srgb, var(--neo-accent) 45%, var(--neo-border-subtle));
+}
+
+.neo-treat-card:focus-visible {
+  outline: 2px solid var(--neo-accent-text);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-treat-card.neo-product {
+    transition: none;
+  }
+  .neo-treat-card.neo-product:hover {
+    transform: none;
+  }
+}
+
+/* Square gradient media with a centred glyph + faint watermark */
+.neo-treat-card__media.neo-product__media {
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, var(--tile-a, #d391b0), var(--tile-b, #7b466a));
+}
+
+.neo-treat-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 55%);
+  pointer-events: none;
+}
+
+.neo-treat-card__glyph {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--neo-radius-full);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #fff;
+}
+
+.neo-treat-card__glyph svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Oversized watermark glyph, bottom-left, for depth */
+.neo-treat-card__watermark {
+  position: absolute;
+  left: -14px;
+  bottom: -22px;
+  width: 120px;
+  height: 120px;
+  color: #fff;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.neo-treat-card__watermark svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+
+.neo-treat-card .neo-product__tag {
+  background: rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.neo-treat-card__summary {
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-muted);
+  margin: var(--neo-space-1) 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.neo-treat-card__price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--neo-space-4);
+}
+
+.neo-treat-card__from {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.neo-treat-card__from-label {
+  font-size: var(--neo-text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--neo-text-muted);
+}
+
+.neo-treat-card__from-value {
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-2xl);
+  color: var(--neo-text-primary);
+}
+
+.neo-treat-card__arrow {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--neo-radius-full);
+  background: color-mix(in srgb, var(--neo-accent) 14%, var(--neo-bg-raised));
+  border: var(--neo-border-1) solid color-mix(in srgb, var(--neo-accent) 26%, transparent);
+  color: var(--neo-accent-text);
+  transition: background var(--neo-duration-fast) var(--neo-ease-default),
+    transform var(--neo-duration-fast) var(--neo-ease-default);
+}
+
+.neo-treat-card__arrow svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.neo-treat-card:hover .neo-treat-card__arrow {
+  background: var(--neo-accent);
+  color: #fff;
+  transform: translateX(3px);
+}
+
+/* Per-category gradient + accent (shared by tile media and modal header) */
+.neo-treat--consultations { --tile-a: #d391b0; --tile-b: #7b466a; }
+.neo-treat--anti-wrinkle { --tile-a: #9f6496; --tile-b: #420d4b; }
+.neo-treat--advanced { --tile-a: #ba6e8f; --tile-b: #5d3c64; }
+.neo-treat--lips { --tile-a: #d391b0; --tile-b: #ba6e8f; }
+.neo-treat--fillers { --tile-a: #9183ce; --tile-b: #5d3c64; }
+.neo-treat--packages { --tile-a: #c77fa6; --tile-b: #420d4b; }
+.neo-treat--sunekos { --tile-a: #d391b0; --tile-b: #9f6496; }
+.neo-treat--microneedling { --tile-a: #9f6496; --tile-b: #5d3c64; }
+
+/* ── Apple-style detail modal ─────────────────────────────── */
+.neo-treat-modal.neo-modal {
+  max-width: min(680px, 100%);
+  width: 100%;
+  max-height: min(86vh, 780px);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--neo-radius-2xl);
+}
+
+.neo-treat-modal__header {
+  position: relative;
+  flex-shrink: 0;
+  padding: var(--neo-space-6);
+  color: #fff;
+  background: linear-gradient(150deg, var(--tile-a, #d391b0), var(--tile-b, #7b466a));
+}
+
+.neo-treat-modal__header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 120% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 55%);
+  pointer-events: none;
+}
+
+.neo-treat-modal__glyph {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--neo-radius-full);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  color: #fff;
+  margin-bottom: var(--neo-space-4);
+}
+
+.neo-treat-modal__glyph svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.neo-treat-modal__eyebrow {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: var(--neo-text-xs);
+  letter-spacing: var(--neo-tracking-overline);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.neo-treat-modal__title {
+  position: relative;
+  z-index: 1;
+  margin: var(--neo-space-2) 0 0;
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-3xl);
+  line-height: var(--neo-leading-tight);
+  color: #fff;
+}
+
+.neo-treat-modal__from {
+  position: relative;
+  z-index: 1;
+  margin: var(--neo-space-3) 0 0;
+  font-size: var(--neo-text-sm);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.neo-treat-modal__from strong {
+  font-size: var(--neo-text-lg);
+  font-weight: 600;
+}
+
+.neo-treat-modal__close {
+  position: absolute;
+  z-index: 2;
+  top: var(--neo-space-4);
+  right: var(--neo-space-4);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--neo-radius-full);
+  background: rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--neo-duration-fast) var(--neo-ease-default),
+    transform var(--neo-duration-fast) var(--neo-ease-default);
+}
+
+.neo-treat-modal__close:hover {
+  background: rgba(0, 0, 0, 0.32);
+  transform: scale(1.06);
+}
+
+.neo-treat-modal__close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.neo-treat-modal__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--neo-space-5) var(--neo-space-6);
+  -webkit-overflow-scrolling: touch;
+}
+
+.neo-treat-modal__intro {
+  margin: 0 0 var(--neo-space-2);
+  color: var(--neo-text-muted);
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+}
+
+.neo-treat-modal__footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neo-space-3);
+  padding: var(--neo-space-4) var(--neo-space-6);
+  border-top: var(--neo-border-1) solid var(--neo-border-subtle);
+  background: var(--neo-bg-raised);
+}
+
+.neo-treat-modal__footer p {
+  margin: 0;
+  font-size: var(--neo-text-sm);
+  color: var(--neo-text-muted);
+}
+
+/* Modal uses the existing .neo-price-row styles for each line */
+.neo-treat-modal .neo-price-row:first-of-type {
+  padding-top: 0;
+}
+
+/* ============================================================
+   "Discover the magic" header — Liquid Glass on web
+   A frosted-glass eyebrow + Bodoni title + lead panel that sits
+   above the treatment carousel. Coherent sibling of .neo-intro
+   (same radius scale, accent usage, spacing rhythm), but with a
+   translucent backdrop-filter surface, a specular top edge, and a
+   soft accent glow behind it to give the blur something to refract.
+   Works in both light and dark themes; degrades gracefully without
+   backdrop-filter; honours prefers-reduced-motion.
+   ============================================================ */
+.neo-magic {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  isolation: isolate;
+}
+
+/* Soft blurred accent blob behind the glass — the thing the
+   translucent surface refracts. Kept very low opacity (premium,
+   not neon). Sits behind the glass in the stacking order. */
+.neo-magic::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -18%;
+  left: 50%;
+  width: min(560px, 86%);
+  height: 78%;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    60% 60% at 50% 40%,
+    color-mix(in srgb, var(--neo-accent) 40%, transparent),
+    transparent 70%
+  );
+  filter: blur(56px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.neo-magic__glass {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 760px;
+  text-align: center;
+  padding: clamp(var(--neo-space-6), 5vw, 56px) clamp(var(--neo-space-5), 5vw, 60px);
+  border-radius: var(--neo-radius-2xl);
+  /* 1px translucent specular edge */
+  border: var(--neo-border-1) solid color-mix(in srgb, #fff 18%, var(--neo-border-subtle));
+  /* faint accent tint baked into a mostly-opaque raised surface so
+     text contrast stays >= 4.5:1 even after backdrop blur */
+  background:
+    radial-gradient(130% 96% at 50% -12%, color-mix(in srgb, var(--neo-accent) 14%, transparent) 0%, transparent 60%),
+    color-mix(in srgb, var(--neo-bg-raised) 78%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  box-shadow:
+    var(--neo-elv-2),
+    0 30px 60px -34px color-mix(in srgb, var(--neo-accent) 40%, var(--neo-shadow-dark));
+  overflow: hidden;
+}
+
+/* Specular sheen: a soft light reflection across the top edge,
+   plus a crisp 1px inner highlight to read as polished glass. */
+.neo-magic__glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #fff 22%, transparent) 0%,
+    transparent 42%
+  );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 45%, transparent);
+}
+
+/* Accent hairline along the very top — matches the .neo-intro panel */
+.neo-magic__glass::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--neo-accent), transparent);
+}
+
+.neo-magic__eyebrow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 var(--neo-space-3);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neo-accent-text);
+}
+
+.neo-magic__eyebrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.neo-magic__title {
+  position: relative;
+  margin: 0;
+}
+
+.neo-magic__lead {
+  position: relative;
+  margin: var(--neo-space-4) auto 0;
+  max-width: 58ch;
+  font-family: var(--neo-font-ui);
+  font-size: clamp(var(--neo-text-base), 1.4vw, var(--neo-text-lg));
+  line-height: var(--neo-leading-relaxed);
+  color: var(--neo-text-primary);
+}
+
+/* Graceful fallback for browsers without backdrop-filter:
+   give the panel a near-solid raised surface so it never looks
+   washed out and text contrast is preserved. */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .neo-magic__glass {
+    background:
+      radial-gradient(130% 96% at 50% -12%, color-mix(in srgb, var(--neo-accent) 14%, transparent) 0%, transparent 60%),
+      var(--neo-bg-raised);
+  }
+}
+
+/* Gentle breathing glow on the accent blob; essential to nothing,
+   so disabled entirely under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .neo-magic::before {
+    animation: neo-magic-glow 9s var(--neo-ease-default) infinite alternate;
+  }
+}
+
+@keyframes neo-magic-glow {
+  from { opacity: 0.4; transform: translateX(-50%) scale(0.96); }
+  to   { opacity: 0.6; transform: translateX(-50%) scale(1.04); }
+}
+
+/* ============================================================
+   Subscribe panel (contact page) — Liquid Glass sibling
+   ============================================================ */
+.neo-subscribe {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.neo-subscribe::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -12%;
+  left: 50%;
+  width: min(480px, 90%);
+  height: 70%;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    60% 60% at 50% 40%,
+    color-mix(in srgb, var(--neo-accent) 36%, transparent),
+    transparent 70%
+  );
+  filter: blur(48px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.neo-subscribe__glass {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  text-align: center;
+  padding: clamp(var(--neo-space-6), 5vw, 52px) clamp(var(--neo-space-5), 5vw, 48px);
+  border-radius: var(--neo-radius-2xl);
+  border: var(--neo-border-1) solid color-mix(in srgb, #fff 18%, var(--neo-border-subtle));
+  background:
+    radial-gradient(130% 96% at 50% -12%, color-mix(in srgb, var(--neo-accent) 12%, transparent) 0%, transparent 60%),
+    color-mix(in srgb, var(--neo-bg-raised) 80%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  box-shadow:
+    var(--neo-elv-2),
+    0 28px 56px -32px color-mix(in srgb, var(--neo-accent) 38%, var(--neo-shadow-dark));
+  overflow: hidden;
+}
+
+.neo-subscribe__glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, #fff 22%, transparent) 0%,
+    transparent 42%
+  );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 45%, transparent);
+}
+
+.neo-subscribe__glass::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--neo-accent), transparent);
+}
+
+.neo-subscribe__eyebrow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 var(--neo-space-3);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neo-accent-text);
+}
+
+.neo-subscribe__eyebrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.neo-subscribe__title {
+  position: relative;
+  margin: 0;
+}
+
+.neo-subscribe__lead {
+  position: relative;
+  margin: var(--neo-space-3) auto 0;
+  max-width: 42ch;
+  color: var(--neo-text-primary);
+}
+
+.neo-subscribe__form {
+  position: relative;
+  margin-top: var(--neo-space-5);
+}
+
+.neo-subscribe__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--neo-space-3);
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.neo-subscribe__field {
+  flex: 1 1 240px;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+.neo-subscribe__input {
+  background: color-mix(in srgb, var(--neo-bg-inset) 88%, transparent);
+  border: var(--neo-border-1) solid color-mix(in srgb, #fff 14%, var(--neo-border-subtle));
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+}
+
+.neo-subscribe__input:focus {
+  border-color: var(--neo-accent);
+  box-shadow:
+    var(--neo-surface-control-inset),
+    0 0 0 3px color-mix(in srgb, var(--neo-accent) 22%, transparent);
+}
+
+.neo-subscribe__btn {
+  flex: 0 0 auto;
+  min-width: 132px;
+  min-height: var(--neo-touch-min);
+  white-space: nowrap;
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .neo-subscribe__glass {
+    background:
+      radial-gradient(130% 96% at 50% -12%, color-mix(in srgb, var(--neo-accent) 12%, transparent) 0%, transparent 60%),
+      var(--neo-bg-raised);
+  }
+  .neo-subscribe__input {
+    background: var(--neo-bg-inset);
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .neo-subscribe::before {
+    animation: neo-magic-glow 9s var(--neo-ease-default) infinite alternate;
+  }
+}
+
+@media (max-width: 540px) {
+  .neo-subscribe__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .neo-subscribe__btn {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   Treatment gallery carousel (homepage)
+   ============================================================ */
+.neo-carousel {
+  margin-top: var(--neo-space-6);
+}
+
+.neo-carousel__stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--neo-radius-2xl);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  background: var(--neo-bg-inset);
+  box-shadow: var(--neo-elv-2);
+  aspect-ratio: 16 / 10;
+}
+
+.neo-carousel__track {
+  display: flex;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: transform var(--neo-duration-slow, 480ms) var(--neo-ease-default, cubic-bezier(0.22, 1, 0.36, 1));
+  will-change: transform;
+}
+
+.neo-carousel__slide {
+  flex: 0 0 100%;
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neo-carousel__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.neo-carousel__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  border-radius: var(--neo-radius-full);
+  background: color-mix(in srgb, var(--neo-bg-raised) 88%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--neo-text-strong, currentColor);
+  cursor: pointer;
+  box-shadow: var(--neo-elv-2);
+  transition: background var(--neo-duration-normal) var(--neo-ease-default),
+    transform var(--neo-duration-fast, 160ms) var(--neo-ease-default),
+    border-color var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+.neo-carousel__nav:hover {
+  background: var(--neo-bg-raised);
+  border-color: var(--neo-accent);
+  color: var(--neo-accent);
+}
+
+.neo-carousel__nav:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.neo-carousel__nav:focus-visible {
+  outline: var(--neo-focus-ring, 2px solid var(--neo-accent));
+  outline-offset: 2px;
+}
+
+.neo-carousel__nav svg {
+  width: 22px;
+  height: 22px;
+}
+
+.neo-carousel__nav--prev { left: var(--neo-space-3); }
+.neo-carousel__nav--next { right: var(--neo-space-3); }
+
+.neo-carousel__counter {
+  position: absolute;
+  right: var(--neo-space-3);
+  bottom: var(--neo-space-3);
+  z-index: 2;
+  margin: 0;
+  padding: 2px 10px;
+  font-size: var(--neo-text-xs, 0.75rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: color-mix(in srgb, #000 55%, transparent);
+  border-radius: var(--neo-radius-full);
+}
+
+.neo-carousel__caption {
+  margin: var(--neo-space-4) 0 0;
+  text-align: center;
+  font-weight: 600;
+  color: var(--neo-text-strong, currentColor);
+}
+
+.neo-carousel__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--neo-space-2);
+  margin: var(--neo-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.neo-carousel__thumb {
+  display: block;
+  width: 64px;
+  height: 44px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: var(--neo-radius-md);
+  background: var(--neo-bg-inset);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--neo-duration-normal) var(--neo-ease-default),
+    border-color var(--neo-duration-normal) var(--neo-ease-default),
+    transform var(--neo-duration-fast, 160ms) var(--neo-ease-default);
+}
+
+.neo-carousel__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.neo-carousel__thumb:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.neo-carousel__thumb.is-active {
+  opacity: 1;
+  border-color: var(--neo-accent);
+}
+
+.neo-carousel__thumb:focus-visible {
+  outline: var(--neo-focus-ring, 2px solid var(--neo-accent));
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .neo-carousel__stage { aspect-ratio: 4 / 5; }
+  .neo-carousel__thumb { width: 52px; height: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-carousel__track { transition: none; }
+}
+
+/* ============================================================
+   Mobile layout QA refinements
+   ============================================================ */
+@media (max-width: 767px) {
+  /* Prevent iOS Safari auto-zoom on focus: form fields must be >= 16px.
+     forms.css re-asserts .neo-input at 14px after the design system's
+     mobile rule, so we force 16px again here at the site level. */
+  .neo-input,
+  .neo-textarea,
+  .neo-select,
+  .neo-subscribe__input {
+    font-size: 16px;
+  }
+
+  /* Comfortable >= 44px tap targets for footer navigation links. */
+  .neo-footer__links a {
+    padding-block: var(--neo-space-3);
+  }
+}
+
+/* ===========================================================================
+   "Let's Chat!" launcher — rebuilds the Wix chat bubble as a quick-contact
+   widget. The static demo has no live inbox, so it routes to the real ways
+   clients reach Artistry: book online, call, email, Instagram.
+   =========================================================================== */
+.abl-chat {
+  --abl-chat-launcher-h: 56px;
+  position: fixed;
+  right: var(--neo-space-5);
+  /* Vertically centred on the right edge by default. The proactive script
+     overrides `top` (in px) to slide the launcher clear of anything it would
+     otherwise cover; until it runs we sit dead centre. */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--neo-z-a11y);
+  font-family: var(--neo-font-ui);
+  display: flex;
+  flex-direction: row-reverse; /* launcher hugs the edge, panel opens to its left */
+  align-items: center;
+  gap: var(--neo-space-3);
+  transition: top var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+/* On narrow screens stack as a column (panel above the launcher) so the panel
+   never runs off the left edge of the viewport. */
+@media (max-width: 600px) {
+  .abl-chat {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abl-chat {
+    transition: none;
+  }
+}
+
+/* Launcher: circular icon-only FAB */
+.abl-chat__launcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: var(--abl-chat-launcher-h);
+  height: var(--abl-chat-launcher-h);
+  padding: 0;
+  border: none;
+  border-radius: var(--neo-radius-full);
+  background: var(--neo-accent-gradient);
+  color: #fff;
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-md);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--neo-accent) 40%, transparent);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--neo-duration-fast) var(--neo-ease-default),
+    box-shadow var(--neo-duration-fast) var(--neo-ease-default);
+}
+
+.abl-chat__launcher:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 38px color-mix(in srgb, var(--neo-accent) 50%, transparent);
+}
+
+.abl-chat__launcher:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.abl-chat__launcher:focus-visible {
+  outline: 3px solid var(--neo-accent-text);
+  outline-offset: 3px;
+}
+
+.abl-chat__launcher-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.abl-chat__launcher-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Label is the button's accessible name but is hidden visually so the
+   launcher reads as an icon-only FAB. Kept in the a11y tree via clip. */
+.abl-chat__launcher-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Swap chat glyph for an X when the panel is open */
+.abl-chat__launcher-icon--close { display: none; }
+.abl-chat--open .abl-chat__launcher-icon--chat { display: none; }
+.abl-chat--open .abl-chat__launcher-icon--close { display: inline-flex; }
+
+/* Panel */
+.abl-chat__panel {
+  width: min(340px, calc(100vw - var(--neo-space-6)));
+  max-height: min(72vh, 520px);
+  background: var(--neo-bg-raised);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  border-radius: var(--neo-radius-lg);
+  box-shadow: var(--neo-shadow-lg, 0 24px 60px rgba(0, 0, 0, 0.18));
+  overflow: auto;
+  transform-origin: center right;
+  transform: translateX(14px) scale(0.96);
+  opacity: 0;
+  transition: transform var(--neo-duration-normal) var(--neo-ease-default),
+    opacity var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+.abl-chat--open .abl-chat__panel {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+/* Mobile: panel rises from above the launcher instead of sliding from the side */
+@media (max-width: 600px) {
+  .abl-chat__panel {
+    transform-origin: bottom right;
+    transform: translateY(14px) scale(0.96);
+  }
+  .abl-chat--open .abl-chat__panel {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.abl-chat__header {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-space-3);
+  padding: var(--neo-space-4);
+  background: var(--neo-accent-gradient);
+  color: #fff;
+}
+
+.abl-chat__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--neo-radius-full);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.abl-chat__avatar svg { width: 22px; height: 22px; }
+
+.abl-chat__heading {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.abl-chat__heading strong {
+  font-size: var(--neo-text-md);
+  font-weight: 600;
+}
+
+.abl-chat__status {
+  font-size: var(--neo-text-xs);
+  opacity: 0.85;
+}
+
+.abl-chat__close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--neo-radius-full);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--neo-duration-fast);
+}
+
+.abl-chat__close:hover { background: rgba(255, 255, 255, 0.3); }
+.abl-chat__close svg { width: 18px; height: 18px; }
+
+.abl-chat__body { padding: var(--neo-space-4); }
+
+.abl-chat__greeting {
+  margin: 0 0 var(--neo-space-4);
+  padding: var(--neo-space-3) var(--neo-space-4);
+  background: var(--neo-bg-inset);
+  border-radius: var(--neo-radius-md);
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-primary);
+}
+
+.abl-chat__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neo-space-2);
+}
+
+.abl-chat__option {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-space-3);
+  padding: var(--neo-space-3);
+  border-radius: var(--neo-radius-md);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  text-decoration: none;
+  color: var(--neo-text-primary);
+  transition: border-color var(--neo-duration-fast), background var(--neo-duration-fast), transform var(--neo-duration-fast);
+}
+
+.abl-chat__option:hover {
+  border-color: var(--neo-accent);
+  background: var(--neo-bg-inset);
+  transform: translateX(2px);
+}
+
+.abl-chat__option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--neo-radius-md);
+  background: color-mix(in srgb, var(--neo-accent) 14%, transparent);
+  color: var(--neo-accent-text);
+}
+
+.abl-chat__option-icon svg { width: 20px; height: 20px; }
+
+.abl-chat__option-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.abl-chat__option-text strong {
+  font-size: var(--neo-text-sm);
+  font-weight: 600;
+}
+
+.abl-chat__option-text span {
+  font-size: var(--neo-text-xs);
+  color: var(--neo-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abl-chat__launcher,
+  .abl-chat__panel,
+  .abl-chat__option { transition: none; }
+}
+
+/* The chat launcher now lives at the right-middle of the viewport, so the
+   accessibility trigger keeps its default bottom-right anchor with no overlap. */
+
+/* ===========================================================================
+   Team — "Meet the team" overview cards + individual member profile pages.
+   Self-contained block (abl-team-*) so it can be appended without touching
+   any shared rules. The per-member price lists reuse the existing
+   .neo-pricelist / .neo-price-card / .neo-price-row styles above.
+   =========================================================================== */
+.abl-team-grid {
+  display: grid;
+  gap: var(--neo-space-5);
+  margin-top: var(--neo-space-7);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 560px) {
+  .abl-team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .abl-team-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--neo-space-6);
+  }
+}
+
+.abl-team-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--neo-space-2);
+  padding: var(--neo-space-6) var(--neo-space-5);
+  background: var(--neo-bg-raised);
+  border: var(--neo-border-1) solid var(--neo-border-subtle);
+  border-radius: var(--neo-radius-2xl);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--neo-duration-normal) var(--neo-ease-default),
+    box-shadow var(--neo-duration-normal) var(--neo-ease-default),
+    border-color var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+.abl-team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--neo-elv-3);
+  border-color: color-mix(in srgb, var(--neo-accent) 45%, var(--neo-border-subtle));
+}
+
+.abl-team-card:focus-visible {
+  outline: 2px solid var(--neo-accent-text);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abl-team-card {
+    transition: none;
+  }
+  .abl-team-card:hover {
+    transform: none;
+  }
+}
+
+/* Monogram avatar (no staff photos in the source scrape, so we render a
+   tasteful initial on the palette accent gradient). */
+.abl-team-avatar {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--neo-radius-full);
+  overflow: hidden;
+  font-family: var(--neo-font-display);
+  font-size: 2.3rem;
+  line-height: 1;
+  color: #fff;
+  background: linear-gradient(150deg, var(--abl-av-a, #d391b0), var(--abl-av-b, #7b466a));
+  box-shadow: 0 16px 32px -16px color-mix(in srgb, var(--neo-accent) 60%, transparent);
+}
+
+.abl-team-avatar--lg {
+  width: 128px;
+  height: 128px;
+  font-size: 3rem;
+}
+
+/* Photo avatars: a real headshot fills the circular badge. The parent clips
+   to a circle (overflow:hidden + border-radius), the image covers it. */
+.abl-team-avatar--photo {
+  background: none;
+}
+
+.abl-team-avatar--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
+/* Per-member colour identity.
+   --abl-av-a / --abl-av-b  : avatar monogram gradient (Alliyah uses a photo)
+   --abl-card               : the card's accent hue (border, role, CTA, tint)
+   --abl-card-deep          : a deeper stop for hover shadow / hero fill
+   Alliyah is the salon owner, so her card is the filled "prime" hero in the
+   brand plum. Beth, Willa and Kirsty each carry a distinct, on-brand hue. */
+.abl-team--alliyah { --abl-av-a: #d391b0; --abl-av-b: #7b466a; --abl-card: #7b337e; --abl-card-deep: #5a2560; }
+.abl-team--beth    { --abl-av-a: #c75d92; --abl-av-b: #7c2049; --abl-card: #b23a6e; --abl-card-deep: #7c2049; }
+.abl-team--willa   { --abl-av-a: #9183ce; --abl-av-b: #4f3f96; --abl-card: #7d6fc7; --abl-card-deep: #4f3f96; }
+.abl-team--kirsty  { --abl-av-a: #d79bbf; --abl-av-b: #8a4e72; --abl-card: #c77fa6; --abl-card-deep: #8a4e72; }
+
+/* The three stylist cards: distinct hue on border, soft corner tint, role
+   label and CTA, with a matching hover lift. Background stays on the theme
+   surface token so body text remains AA-legible in light and dark. */
+.abl-team-card { position: relative; overflow: hidden; }
+
+.abl-team-card:not(.abl-team--alliyah) {
+  border-color: color-mix(in srgb, var(--abl-card) 38%, var(--neo-border-subtle));
+  background:
+    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--abl-card) 13%, transparent) 0%, transparent 58%),
+    var(--neo-bg-raised);
+}
+
+.abl-team-card:not(.abl-team--alliyah) .abl-team-card__role,
+.abl-team-card:not(.abl-team--alliyah) .abl-team-card__cta {
+  color: var(--abl-card);
+}
+
+.abl-team-card:not(.abl-team--alliyah):hover {
+  border-color: var(--abl-card);
+  box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--abl-card-deep) 75%, transparent);
+}
+
+/* Lift the hue toward white in dark mode so labels keep contrast on dark cards */
+[data-neo-theme="dark"] .abl-team-card:not(.abl-team--alliyah) .abl-team-card__role,
+[data-neo-theme="dark"] .abl-team-card:not(.abl-team--alliyah) .abl-team-card__cta {
+  color: color-mix(in srgb, var(--abl-card) 65%, #fff);
+}
+
+/* Owner card — the filled prime hero in brand plum, with light text. A faint
+   light edge + soft glow keeps it distinct from the dark-theme plum backdrop. */
+.abl-team--alliyah {
+  border-color: color-mix(in srgb, #fff 22%, transparent);
+  background: linear-gradient(158deg, #9f6496 0%, #5a2560 100%);
+  color: #fff;
+  box-shadow: 0 18px 40px -22px rgba(90, 37, 96, 0.65);
+}
+
+.abl-team--alliyah .abl-team-card__name { color: #fff; }
+.abl-team--alliyah .abl-team-card__role { color: rgba(255, 255, 255, 0.86); }
+.abl-team--alliyah .abl-team-card__handle,
+.abl-team--alliyah .abl-team-card__summary { color: rgba(255, 255, 255, 0.82); }
+.abl-team--alliyah .abl-team-card__cta { color: #fff; }
+
+.abl-team--alliyah .abl-team-avatar {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.28), 0 16px 32px -16px rgba(0, 0, 0, 0.45);
+}
+
+.abl-team--alliyah:hover {
+  border-color: transparent;
+  box-shadow: 0 22px 48px -20px rgba(90, 37, 96, 0.7);
+}
+
+.abl-team-card__name {
+  margin: var(--neo-space-3) 0 0;
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-2xl);
+  line-height: var(--neo-leading-tight);
+  color: var(--neo-text-primary);
+}
+
+.abl-team-card__role {
+  margin: 0;
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--neo-tracking-overline);
+  text-transform: uppercase;
+  color: var(--neo-accent-text);
+}
+
+.abl-team-card__handle {
+  margin: var(--neo-space-1) 0 0;
+  font-size: var(--neo-text-sm);
+  color: var(--neo-text-muted);
+}
+
+.abl-team-card__summary {
+  margin: var(--neo-space-3) 0 0;
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-muted);
+}
+
+.abl-team-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-2);
+  margin-top: var(--neo-space-4);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 600;
+  color: var(--neo-accent-text);
+}
+
+.abl-team-card__cta svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--neo-duration-fast) var(--neo-ease-default);
+}
+
+.abl-team-card:hover .abl-team-card__cta svg {
+  transform: translateX(3px);
+}
+
+/* ── Individual member profile header ─────────────────────────────
+   A premium "identity panel". The member hue (--abl-card / --abl-card-deep
+   set per member above) drives a soft corner wash, a top accent ribbon, a
+   ringed portrait, the role pill and the meta chips. Alliyah (owner) gets
+   the filled prime-plum treatment with light text. --abl-ink is the legible
+   accent ink for labels: the deep hue in light, lifted toward white in dark. */
+.abl-team-profile {
+  --abl-accent: var(--abl-card, var(--neo-accent));
+  --abl-accent-deep: var(--abl-card-deep, var(--neo-accent-dark));
+  --abl-ink: var(--abl-accent-deep);
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: var(--neo-space-6);
+  align-items: center;
+  padding: clamp(var(--neo-space-6), 4vw, var(--neo-space-8)) clamp(var(--neo-space-5), 4vw, var(--neo-space-7));
+  background:
+    radial-gradient(135% 105% at 0% 0%, color-mix(in srgb, var(--abl-accent) 16%, transparent) 0%, transparent 60%),
+    var(--neo-bg-raised);
+  border: var(--neo-border-1) solid color-mix(in srgb, var(--abl-accent) 30%, var(--neo-border-subtle));
+  border-radius: var(--neo-radius-2xl);
+  box-shadow: 0 1px 2px var(--neo-shadow-dark), 0 30px 60px -42px color-mix(in srgb, var(--abl-accent-deep) 70%, transparent);
+}
+
+[data-neo-theme="dark"] .abl-team-profile {
+  --abl-ink: color-mix(in srgb, var(--abl-accent) 68%, #fff);
+}
+
+/* Slim accent ribbon along the top edge, echoing the service cards */
+.abl-team-profile::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--abl-accent), transparent 78%);
+}
+
+@media (min-width: 720px) {
+  .abl-team-profile {
+    grid-template-columns: auto 1fr;
+    gap: clamp(var(--neo-space-6), 4vw, var(--neo-space-8));
+  }
+}
+
+.abl-team-profile__media {
+  display: flex;
+  justify-content: center;
+}
+
+/* Larger, layered-ring portrait tinted in the member hue */
+.abl-team-profile .abl-team-avatar--lg {
+  width: clamp(124px, 17vw, 152px);
+  height: clamp(124px, 17vw, 152px);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--abl-accent) 45%, transparent),
+    0 0 0 7px color-mix(in srgb, var(--abl-accent) 14%, transparent),
+    0 22px 40px -22px color-mix(in srgb, var(--abl-accent-deep) 75%, transparent);
+}
+
+.abl-team-profile__name {
+  margin: 0;
+}
+
+/* Role rendered as an accent pill with a leading dot */
+.abl-team-profile__role {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-2);
+  margin: 0 0 var(--neo-space-3);
+  padding: 6px 14px 6px 12px;
+  border-radius: var(--neo-radius-full);
+  background: color-mix(in srgb, var(--abl-accent) 14%, transparent);
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--neo-tracking-overline);
+  text-transform: uppercase;
+  color: var(--abl-ink);
+}
+
+.abl-team-profile__role::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: var(--neo-radius-full);
+  background: var(--abl-accent);
+}
+
+.abl-team-profile__bio {
+  margin: var(--neo-space-4) 0 0;
+  max-width: 60ch;
+  color: var(--neo-text-muted);
+  line-height: var(--neo-leading-normal);
+}
+
+.abl-team-meta {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neo-space-2);
+  margin: var(--neo-space-5) 0 0;
+  padding: var(--neo-space-5) 0 0;
+  border-top: var(--neo-border-1) solid color-mix(in srgb, var(--abl-accent) 18%, var(--neo-border-subtle));
+}
+
+.abl-team-meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-2);
+  padding: var(--neo-space-2) var(--neo-space-3);
+  border-radius: var(--neo-radius-full);
+  background: color-mix(in srgb, var(--abl-accent) 12%, var(--neo-bg-inset));
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 500;
+  color: var(--neo-text-primary);
+}
+
+.abl-team-meta svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--abl-ink);
+}
+
+.abl-team-profile__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--neo-space-3);
+  margin-top: var(--neo-space-6);
+}
+
+/* Owner (Alliyah) — filled prime-plum identity panel with light text */
+.abl-team-profile.abl-team--alliyah {
+  --abl-ink: #fff;
+  background: linear-gradient(158deg, #9f6496 0%, #5a2560 100%);
+  border-color: color-mix(in srgb, #fff 24%, transparent);
+  color: #fff;
+  box-shadow: 0 24px 52px -26px rgba(90, 37, 96, 0.7);
+}
+
+.abl-team-profile.abl-team--alliyah .abl-team-profile__name { color: #fff; }
+.abl-team-profile.abl-team--alliyah .abl-team-profile__bio { color: rgba(255, 255, 255, 0.86); }
+
+.abl-team-profile.abl-team--alliyah .abl-team-profile__role {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.abl-team-profile.abl-team--alliyah .abl-team-profile__role::before { background: #fff; }
+
+.abl-team-profile.abl-team--alliyah .abl-team-meta {
+  border-top-color: rgba(255, 255, 255, 0.22);
+}
+.abl-team-profile.abl-team--alliyah .abl-team-meta li {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+.abl-team-profile.abl-team--alliyah .abl-team-meta svg { color: #fff; }
+
+.abl-team-profile.abl-team--alliyah .abl-team-avatar--lg {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.3),
+    0 22px 40px -20px rgba(0, 0, 0, 0.5);
+}
+
+/* On the plum panel the brand CTAs would blend, so swap to a light solid +
+   a ghost outline (scoped to the owner header only). */
+.abl-team-profile.abl-team--alliyah .abl-team-profile__actions .neo-btn--primary {
+  background: #fff;
+  color: #5a2560;
+}
+.abl-team-profile.abl-team--alliyah .abl-team-profile__actions .neo-btn--primary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+}
+.abl-team-profile.abl-team--alliyah .abl-team-profile__actions .neo-btn--secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #fff;
+}
+.abl-team-profile.abl-team--alliyah .abl-team-profile__actions .neo-btn--secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #fff;
+}
+
+.abl-team-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-2);
+  margin-bottom: var(--neo-space-4);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 600;
+  color: var(--neo-text-muted);
+  text-decoration: none;
+}
+
+.abl-team-back:hover {
+  color: var(--neo-accent-text);
+}
+
+.abl-team-back svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Per-service price cards (member pages) ───────────────────────
+   One card per individual service, grouped under a category header, in a
+   responsive grid (1 / 2 / 3 columns). Each card carries the service name,
+   an optional description and an emphasised price pinned to the foot so
+   prices align across a row. Tinted with the member hue via --abl-card.
+   Self-contained (abl-svc-*) so the shared .neo-pricelist / .neo-price-card
+   styles used on Treatments stay untouched. */
+.abl-svc {
+  margin-top: var(--neo-space-6);
+  display: grid;
+  gap: var(--neo-space-8);
+}
+
+/* Member hue tokens for the service grid. Kept separate from the bare
+   .abl-team--* classes (one of which paints the owner hero background) so
+   the cards only inherit the colour, not the panel treatment. Values mirror
+   the per-member --abl-card / --abl-card-deep identities above. */
+.abl-svc--alliyah { --abl-card: #7b337e; --abl-card-deep: #5a2560; }
+.abl-svc--beth    { --abl-card: #b23a6e; --abl-card-deep: #7c2049; }
+.abl-svc--willa   { --abl-card: #7d6fc7; --abl-card-deep: #4f3f96; }
+.abl-svc--kirsty  { --abl-card: #c77fa6; --abl-card-deep: #8a4e72; }
+
+.abl-svc-group {
+  --abl-accent: var(--abl-card, var(--neo-accent));
+  --abl-accent-deep: var(--abl-card-deep, var(--neo-accent-dark));
+  --abl-ink: var(--abl-accent-deep);
+}
+
+[data-neo-theme="dark"] .abl-svc-group {
+  --abl-ink: color-mix(in srgb, var(--abl-accent) 68%, #fff);
+}
+
+.abl-svc-group__head {
+  margin: 0 0 var(--neo-space-5);
+}
+
+.abl-svc-group__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-space-2);
+  margin: 0;
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-sm);
+  font-weight: 600;
+  letter-spacing: var(--neo-tracking-overline);
+  text-transform: uppercase;
+  color: var(--abl-ink);
+}
+
+.abl-svc-group__eyebrow::before {
+  content: "";
+  width: 24px;
+  height: 2px;
+  border-radius: var(--neo-radius-full);
+  background: var(--abl-accent);
+}
+
+.abl-svc-group__intro {
+  margin: var(--neo-space-2) 0 0;
+  max-width: 70ch;
+  color: var(--neo-text-muted);
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+}
+
+.abl-svc-grid {
+  display: grid;
+  gap: var(--neo-space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 560px) {
+  .abl-svc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .abl-svc-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.abl-svc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--neo-space-2);
+  padding: var(--neo-space-5);
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--abl-accent) 9%, transparent) 0%, transparent 62%),
+    var(--neo-bg-raised);
+  border: var(--neo-border-1) solid color-mix(in srgb, var(--abl-accent) 22%, var(--neo-border-subtle));
+  border-radius: var(--neo-radius-xl);
+  box-shadow: 0 1px 2px var(--neo-shadow-dark), 0 20px 38px -32px var(--neo-shadow-dark);
+  transition:
+    transform var(--neo-duration-normal) var(--neo-ease-default),
+    border-color var(--neo-duration-normal) var(--neo-ease-default),
+    box-shadow var(--neo-duration-normal) var(--neo-ease-default);
+}
+
+@media (hover: hover) {
+  .abl-svc-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--abl-accent) 55%, var(--neo-border-subtle));
+    box-shadow: 0 1px 2px var(--neo-shadow-dark), 0 26px 48px -28px color-mix(in srgb, var(--abl-accent-deep) 60%, transparent);
+  }
+}
+
+.abl-svc-card__name {
+  margin: 0;
+  font-family: var(--neo-font-ui);
+  font-weight: 600;
+  font-size: var(--neo-text-base);
+  line-height: 1.3;
+  color: var(--neo-text-primary);
+}
+
+.abl-svc-card__desc {
+  margin: 0;
+  font-size: var(--neo-text-sm);
+  line-height: var(--neo-leading-normal);
+  color: var(--neo-text-muted);
+}
+
+.abl-svc-card__price {
+  margin: var(--neo-space-3) 0 0;
+  margin-top: auto;
+  padding-top: var(--neo-space-3);
+  border-top: var(--neo-border-1) solid color-mix(in srgb, var(--abl-accent) 18%, var(--neo-border-subtle));
+  font-family: var(--neo-font-display);
+  font-size: var(--neo-text-2xl);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--abl-ink);
+}
+
+/* "From" qualifier sits quieter than the figure */
+.abl-svc-card__price small {
+  margin-right: var(--neo-space-1);
+  font-family: var(--neo-font-ui);
+  font-size: var(--neo-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--neo-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abl-svc-card { transition: none; }
+  .abl-svc-card:hover { transform: none; }
+}
+
+/* ===========================================================================
+   Mobile menu as a half-width right-hand drawer.
+   The Neo default is a full-screen overlay; here the panel slides in over the
+   right half of the screen while the rest dims behind a tappable scrim. Scoped
+   to this site so other rebuilds keep the full-screen drawer.
+   =========================================================================== */
+.neo-mobile-menu {
+  /* The container becomes the scrim; the inner panel is what slides in. */
+  background: var(--neo-overlay);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transform: none;
+  opacity: 0;
+  transition: opacity var(--neo-duration-normal) var(--neo-ease-default),
+    visibility var(--neo-duration-normal);
+}
+
+.neo-mobile-menu--open {
+  transform: none;
+  opacity: 1;
+}
+
+.neo-mobile-menu__inner {
+  width: 50%;
+  min-width: 300px;
+  max-width: 460px;
+  margin-left: auto;
+  background: color-mix(in srgb, var(--neo-bg-base) 98%, transparent);
+  border-left: var(--neo-border-1) solid var(--neo-border-subtle);
+  box-shadow: -28px 0 64px -28px var(--neo-shadow-dark);
+  transform: translateX(100%);
+  transition: transform var(--neo-duration-slow) var(--neo-ease-default);
+}
+
+.neo-mobile-menu--open .neo-mobile-menu__inner {
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-mobile-menu,
+  .neo-mobile-menu__inner {
+    transition-duration: 0.01ms;
+  }
+}
